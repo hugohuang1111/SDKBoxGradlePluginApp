@@ -7,3 +7,7 @@
 /build
 /captures
 .externalNativeBuild
+repo
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
