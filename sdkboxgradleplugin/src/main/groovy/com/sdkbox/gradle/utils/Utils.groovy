@@ -14,6 +14,10 @@ public class Utils {
 
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance()
         try {
+            def manifest = new File(file)
+            if (!manifest.exists()) {
+                return activities
+            }
             SAXParser saxParser = saxParserFactory.newSAXParser()
             saxParser.parse(new File(file), new DefaultHandler() {
                 @Override

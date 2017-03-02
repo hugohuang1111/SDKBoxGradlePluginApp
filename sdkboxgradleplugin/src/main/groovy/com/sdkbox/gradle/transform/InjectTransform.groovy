@@ -5,22 +5,22 @@ import com.android.annotations.Nullable
 import com.android.build.api.transform.*
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
+import com.sdkbox.gradle.asm.ActivityVisitor
 import com.sdkbox.gradle.utils.Log
+import com.sdkbox.gradle.utils.Utils
+import jdk.internal.org.objectweb.asm.ClassReader
+import jdk.internal.org.objectweb.asm.ClassVisitor
+import jdk.internal.org.objectweb.asm.ClassWriter
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.IOUtils
 import org.gradle.api.Project
 
-import java.util.jar.JarEntry
-import java.util.jar.JarFile
-import java.util.jar.JarOutputStream
-import java.util.zip.ZipEntry
-
+import java.nio.file.Paths
 
 public class InjectTransform extends Transform {
     static AppExtension android
     private static Project project;
-    private List<String> classList = new ArrayList<String>();
+    private List<String> classList;
 
     public InjectTransform(Project project) {
         InjectTransform.project = project
@@ -55,16 +55,12 @@ public class InjectTransform extends Transform {
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
         android = project.extensions.getByType(AppExtension)
 
+        configTargetClass()
+        appendActivityTargetClass()
+
         inputs.each { TransformInput input ->
-            /**
-             * 遍历jar
-             * JarInput和DirectoryInput两个接口都继承自QualifiedContent这个接口
-             * 他们的scope属性（枚举，类型为QualifiedContent.Scope）表明这个Input所属的类型可见源码注释
-             * @see QualifiedContent.Scope
-             */
             input.jarInputs.each { JarInput jarInput ->
                 String destName = jarInput.file.name;
-                Log.debug(jarInput.file.absolutePath)
                 /**
                  * Rename, maybe exist same name file
                  * */
@@ -92,15 +88,21 @@ public class InjectTransform extends Transform {
              */
             input.directoryInputs.each { DirectoryInput directoryInput ->
                 File dest = outputProvider.getContentLocation(directoryInput.name, directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY);
-                FileUtils.copyDirectory(directoryInput.file, dest);
+                File src = modifyDirectoryInputIf(directoryInput.file, context.temporaryDir)
+                FileUtils.copyDirectory(src, dest);
             }
         }
     }
 
     private File modifyJarFileIf(File inputJar, File tempDir) {
         if (null == inputJar) {
-            return
+            return inputJar
         }
+
+        InjectJar inj = InjectJar(inputJar)
+        return inj.inject()
+
+        /*
         def outputJar = null
         def willModify = false
         def jarInput = new JarFile(inputJar)
@@ -151,6 +153,42 @@ public class InjectTransform extends Transform {
         jarInput.close();
 
         return outputJar;
+        */
+    }
+
+    private File modifyDirectoryInputIf(File inputDirectory, File tempDir) {
+        if (null == inputDirectory) {
+            return inputDirectory
+        }
+        classList.each {String className ->
+            String classPath = className.replace('.', '/') + '.class'
+            File classFile = new File(inputDirectory, classPath);
+            if (classFile.exists()) {
+                injectClassFile(classFile.absolutePath)
+            } else {
+                Log.error("$classPath not exist")
+            }
+        }
+        return inputDirectory
+    }
+
+    private void injectClassFile(String path) {
+        try {
+            byte[] b;
+            InputStream is = new FileInputStream(path);
+
+            ClassReader cr = new ClassReader(is);
+            ClassWriter cw = new ClassWriter(0);
+            ClassVisitor cv = new ActivityVisitor(cw);
+            cr.accept(cv, 0);
+            b = cw.toByteArray();
+
+            FileOutputStream fos = new FileOutputStream(path);
+            fos.write(b);
+            fos.close();
+        } catch (Exception e) {
+            Log.error(e)
+        }
     }
 
     private boolean willInject(String className) {
@@ -166,5 +204,17 @@ public class InjectTransform extends Transform {
         }
 
         return sourceBytes
+    }
+
+    private void configTargetClass() {
+        classList = new ArrayList<String>()
+    }
+
+    private void appendActivityTargetClass() {
+        def buildType = 'debug'
+        def activities = Utils.findActivitys(
+                Paths.get(project.buildDir.path, "intermediates", 'manifests', 'full', buildType, 'AndroidManifest.xml')
+                        .toString())
+        classList.addAll(activities)
     }
 }

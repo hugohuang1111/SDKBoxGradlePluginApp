@@ -32,7 +32,7 @@ public class SDKBox implements Plugin<Project> {
         project.gradle.addListener(new GradleBuildListener())
         createExtension()
         createTask()
-        // registerTransform()
+        registerTransform()
     }
 
     void createExtension() {

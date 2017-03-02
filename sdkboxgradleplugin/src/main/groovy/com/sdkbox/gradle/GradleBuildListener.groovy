@@ -19,6 +19,7 @@ class GradleBuildListener implements TaskExecutionListener, BuildListener {
         clock = new Clock()
         // println "GradleBuildListener task before execute " + task.getName()
 
+        /*
         if ('transformClassesWithDexForDebug' == task.getName()) {
             def taskName = 'sdkboxConfigClass'
             Set<Task> tasks = task.project.getTasksByName(taskName, false)
@@ -30,6 +31,7 @@ class GradleBuildListener implements TaskExecutionListener, BuildListener {
                 t.execute()
             }
         }
+        */
     }
 
     @Override

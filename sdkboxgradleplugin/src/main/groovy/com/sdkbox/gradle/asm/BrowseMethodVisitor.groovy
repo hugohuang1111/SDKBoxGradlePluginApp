@@ -1,24 +1,16 @@
 package com.sdkbox.gradle.asm
 
-import com.sdkbox.gradle.utils.Log
-import jdk.internal.org.objectweb.asm.Label
 import jdk.internal.org.objectweb.asm.MethodVisitor
 import jdk.internal.org.objectweb.asm.Opcodes
 
-public class ActivityMethodVisitor extends MethodVisitor {
+public class BrowseMethodVisitor extends MethodVisitor {
 
-    public ActivityMethodVisitor(MethodVisitor mv) {
+    public BrowseMethodVisitor(MethodVisitor mv) {
         super(Opcodes.ASM5, mv);
     }
 
     @Override
     public void visitCode() {
-
-        /*
-         * source code:
-         * android/util/Log("HHH", "this is from asm")
-         *
-         */
         mv.visitLdcInsn("SDKBox")
         mv.visitLdcInsn("this is from asm")
         mv.visitMethodInsn(Opcodes.INVOKESTATIC,
@@ -51,12 +43,8 @@ public class ActivityMethodVisitor extends MethodVisitor {
                 "(Ljava/lang/String;)V",
                 false);
         */
-//        super.visitCode()
+        super.visitCode()
     }
 
-    @Override
-    void visitLineNumber(int i, Label label) {
-        Log.error('visit line number:' + i + ' ' + label)
-        super.visitLineNumber(i, label)
-    }
 }
+
