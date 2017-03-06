@@ -77,7 +77,7 @@ public class InjectTransform extends Transform {
                 def jarOutput = modifyJarFileIf(jarInput.file, context.temporaryDir)
                 if (null == jarOutput) {
                     Log.error('modify Jar file fail, use jarInput file replace')
-                    jarOutput = jarInput
+                    jarOutput = jarInput.file
                 }
                 FileUtils.copyFile(jarOutput, dest);
             }
@@ -99,7 +99,11 @@ public class InjectTransform extends Transform {
             return inputJar
         }
 
-        InjectJar inj = InjectJar(inputJar)
+        if (!inputJar.absolutePath.contains("inmobi")) {
+            return inputJar
+        }
+
+        InjectJar inj = new InjectJar(inputJar, tempDir)
         return inj.inject()
 
         /*
@@ -166,7 +170,7 @@ public class InjectTransform extends Transform {
             if (classFile.exists()) {
                 injectClassFile(classFile.absolutePath)
             } else {
-                Log.error("$classPath not exist")
+                // maybe the activity class include in third part lib file
             }
         }
         return inputDirectory

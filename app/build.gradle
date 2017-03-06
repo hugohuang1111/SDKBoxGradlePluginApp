@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion "24.0.2"
     defaultConfig {
         applicationId "com.sdkbox.gradle.sdkboxgradlepluginapp"
-        minSdkVersion 9
-        targetSdkVersion 23
+        minSdkVersion 14
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -24,9 +24,17 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:23.4.0'
+    compile 'com.android.support:appcompat-v7:24.0.0'
+    compile 'com.inmobi.monetization:inmobi-ads:6.1.0'
+    compile 'com.google.android.gms:play-services:8.4.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
+    compile 'com.android.support:recyclerview-v7:24.0.0'
+    //compile 'com.android.support:multidex:1.0.1'
+
     testCompile 'junit:junit:4.12'
 }
+
+///* SDKBox BEGIN
 
 buildscript {
    repositories {
@@ -43,3 +51,5 @@ SDKBox {
     appID '123456'
     appSec '098765'
 }
+
+// SDKBox End */

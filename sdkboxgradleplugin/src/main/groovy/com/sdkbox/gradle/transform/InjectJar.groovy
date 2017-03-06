@@ -15,9 +15,9 @@ public class InjectJar {
     private File jarFile
     private def tempDir
 
-    public InjectJar(File jar) {
+    public InjectJar(File jar, File dir) {
         jarFile = jar
-        tempDir = './sdkbox'
+        tempDir = dir
     }
 
     public File inject() {
@@ -26,14 +26,15 @@ public class InjectJar {
             return jarFile
         }
 
+//        return jarFile
         return injectClass(jarFile)
     }
 
     private File injectClass(File jar) {
-        def jarInput = new JarFile(inputJar)
+        def jarInput = new JarFile(jar)
         def jarOutput = null
 
-        def hexName = DigestUtils.md5Hex(inputJar.absolutePath).substring(0, 8);
+        def hexName = DigestUtils.md5Hex(jar.absolutePath).substring(0, 8);
         jarOutput = new File(tempDir, hexName + jar.name)
         JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(jarOutput));
 
@@ -49,9 +50,11 @@ public class InjectJar {
             byte[] sourceClassBytes = IOUtils.toByteArray(jarInput.getInputStream(jarEntry));
             if (entryName.endsWith(".class")) {
                 modifiedClassBytes = BrowseClassVisitor.inject(sourceClassBytes)
+                if (modifiedClassBytes == null) {
+                    Log.error("inject class failed, use origin replace: $jar.absolutePath $entryName")
+                }
             }
             if (modifiedClassBytes == null) {
-                Log.error('inject class failed, use origin replace')
                 modifiedClassBytes = sourceClassBytes
             }
 

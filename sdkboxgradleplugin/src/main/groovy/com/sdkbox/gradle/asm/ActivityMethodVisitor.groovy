@@ -1,6 +1,5 @@
 package com.sdkbox.gradle.asm
 
-import com.sdkbox.gradle.utils.Log
 import jdk.internal.org.objectweb.asm.Label
 import jdk.internal.org.objectweb.asm.MethodVisitor
 import jdk.internal.org.objectweb.asm.Opcodes
@@ -13,19 +12,6 @@ public class ActivityMethodVisitor extends MethodVisitor {
 
     @Override
     public void visitCode() {
-
-        /*
-         * source code:
-         * android/util/Log("HHH", "this is from asm")
-         *
-         */
-        mv.visitLdcInsn("SDKBox")
-        mv.visitLdcInsn("this is from asm")
-        mv.visitMethodInsn(Opcodes.INVOKESTATIC,
-                "android/util/Log", "d",
-                "(Ljava/lang/String;Ljava/lang/String;)I",
-                false)
-        mv.visitInsn(Opcodes.POP)
 
         /*
          * source code:
@@ -51,12 +37,50 @@ public class ActivityMethodVisitor extends MethodVisitor {
                 "(Ljava/lang/String;)V",
                 false);
         */
-//        super.visitCode()
+        super.visitCode()
     }
 
     @Override
-    void visitLineNumber(int i, Label label) {
-        Log.error('visit line number:' + i + ' ' + label)
-        super.visitLineNumber(i, label)
+    void visitInsn(int opcode) {
+        if (opcode == Opcodes.RETURN) {
+            /*
+             * source code:
+             * android/util/Log("HHH", "this is from asm")
+             *
+             */
+            mv.visitLdcInsn("SDKBox")
+            mv.visitLdcInsn("this is from asm")
+            mv.visitMethodInsn(Opcodes.INVOKESTATIC,
+                    "android/util/Log", "d",
+                    "(Ljava/lang/String;Ljava/lang/String;)I",
+                    false)
+            mv.visitInsn(Opcodes.POP)
+        }
+        super.visitInsn(opcode)
+    }
+
+    @Override
+    void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+        if ('java.net.HttpURLConnection' == owner && 'connect' == name) {
+            super.visitMethodInsn(Opcodes.INVOKESTATIC,
+                    'com/sdkbox/gradle/sdkboxgradlepluginapp/NetBridge',
+                    'HttpURLConnect_connect',
+                    '(Ljava.net.HttpURLConnection;)V', itf)
+        } else {
+            super.visitMethodInsn(opcode, owner, name, desc, itf)
+        }
+//        Log.debug("visitMethodInsn:$opcode,$owner,$name,$desc,$itf")
+    }
+
+    @Override
+    void visitFieldInsn(int opcode, String owner, String name, String desc) {
+        super.visitFieldInsn(opcode, owner, name, desc)
+//        Log.debug("visitFieldInsn:$opcode,$owner,$name,$desc")
+    }
+
+    @Override
+    void visitLocalVariable(String name, String desc, String signature, Label start, Label end, int index) {
+        super.visitLocalVariable(name, desc, signature, start, end, index)
+//        Log.debug("visitLocalVariable:$name,$desc,$signature,$start,$end,$index")
     }
 }
