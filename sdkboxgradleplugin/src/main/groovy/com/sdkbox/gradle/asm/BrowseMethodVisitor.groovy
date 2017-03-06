@@ -72,44 +72,6 @@ public class BrowseMethodVisitor extends MethodVisitor {
             replace = true
         }
 
-        /*
-        if ('java/net/URL' == owner) {
-            if ('openConnection' == name) {
-                super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                        'com/sdkbox/gradle/sdkboxgradlepluginapp/NetBridge',
-                        'URL_openConnection',
-                        '(Ljava/net/URL;)Ljava/net/URLConnection;', itf)
-                replace = true
-            }
-        } else if (('java/net/HttpURLConnection' == owner || "javax/net/ssl/HttpsURLConnection" == owner)) {
-            if ('connect' == name) {
-                super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                        'com/sdkbox/gradle/sdkboxgradlepluginapp/NetBridge',
-                        'HttpURLConnect_connect',
-                        '(Ljava/net/URLConnection;)V', itf)
-                replace = true
-            } else if ('getResponseCode' == name) {
-                super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                        'com/sdkbox/gradle/sdkboxgradlepluginapp/NetBridge',
-                        'HttpURLConnect_getResponseCode',
-                        '(Ljava/net/HttpURLConnection;)I', itf)
-                replace = true
-            }
-        } else if ('android/webkit/WebView' == owner) {
-            if ('loadUrl' == name) {
-                def targetDesc = '(Landroid/webkit/WebView;Ljava/lang/String;)V'
-                if ('(Ljava/lang/String;Ljava/util/Map;)V' == desc) {
-                    targetDesc = '(Landroid/webkit/WebView;Ljava/lang/String;Ljava/util/Map;)V'
-                }
-                super.visitMethodInsn(Opcodes.INVOKESTATIC,
-                        'com/sdkbox/gradle/sdkboxgradlepluginapp/NetBridge',
-                        'WebView_loadUrl',
-                        targetDesc, itf)
-                replace = true
-            }
-        }
-        */
-
         if (!replace) {
             super.visitMethodInsn(opcode, owner, name, desc, itf)
         }
